@@ -1,11 +1,20 @@
-from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
+class User(db.Model):
+    __tablename__="Users"
+    id = db.Column(db.Integer,primary_key=True)
+    name=db.Column(db.String(20),nullable=False)
+    password=db.Column(db.String(20),nullable=False)
+    email=db.Column(db.String(20))
+
 class Doctors(db.Model):
     __tablename__="Doctors"
     id = db.Column(db.Integer,primary_key=True)
+    name=db.Column(db.String(20),nullable=False)
+    dept=db.Column(db.String(20),nullable=False)
+    exp = db.Column(db.Integer,nullable=False)
 
 class Appointments(db.Model):
     __tablename__="Appointments"
@@ -25,7 +34,7 @@ class Treatments(db.Model):
     Notes = db.Column(db.String(100))
 
 class Departments(db.Model):
-    __tablename__="Doctors"
+    __tablename__="Departments"
     id = db.Column(db.Integer,primary_key=True)
     deptid= db.Column(db.Integer,unique=True)
     deptname=db.Column(db.String(20))
