@@ -5,9 +5,9 @@ db = SQLAlchemy()
 class User(db.Model):
     __tablename__="Users"
     id = db.Column(db.Integer,primary_key=True)
-    name=db.Column(db.String(20),nullable=False)
+    username=db.Column(db.String(20),nullable=False,unique=True)
     password=db.Column(db.String(20),nullable=False)
-    email=db.Column(db.String(20))
+    email=db.Column(db.String(20),unique=True)
 
 class Doctors(db.Model):
     __tablename__="Doctors"
