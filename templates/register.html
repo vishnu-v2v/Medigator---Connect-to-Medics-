@@ -1,0 +1,35 @@
+{% extends "base_pub.html"%}
+
+{% block content %}
+    <div class="container">
+        <div class="row justify-content-center my-25 " style="margin-top: 200px; margin-bottom: 32px;">
+            <div class="col-11 col-md-6 col-lg-4">
+                <div class="card shadow text-center">
+                    <div class="card-header">
+                        <h3>Register</h3>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{url_for('register')}}" method ="POST">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Username</label>
+                                <input type="text" class="form-control" placeholder="Enter unique username" name='name'id="name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email address</label>
+                                <input type="email" class="form-control" placeholder="Enter your email" name='email'id="email" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" class="form-control" placeholder="Enter your password" name='password'id="password" required>
+                            </div>
+                            <button type="submit" class="btn btn-dark w-100">Register</button>
+                        </form>
+                    </div>
+                    <div class="card-footer text-body-secondary">
+                        Already Have an Account? <a href="{{url_for('login')}}">Click Here to Login!</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
