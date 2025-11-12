@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medigator - Connect to Medic !</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand">Welcome Admin!</a>
+            <form class="d-flex" role="search">
+            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" style="width: 300px;"/>
+            <button class="btn btn-outline-light" type="submit">Search</button>
+            </form>
+            <a style="text-decoration: none; color: aliceblue;" href="{{url_for('logout')}}"><span style="font-size: large;">Logout</span></a>
+        </div>
+    </nav>
+    <main>
+        <div class="container mt-5">
+            <div class="d-flex justify-content-between">
+                <h3>Registered Doctors :</h3> <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#create_doc_Backdrop">CREATE</button>
+                
+            </div>
+            <br>
+            <table class="table table-bordered">
+                <thead class="text-center">
+                    <tr>
+                        <th style="width:100px;">ID</th>
+                        <th style="width: 750px;">DOCTOR</th>
+                        <th colspan="3" style="width:100px;">ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody class="text-center">
+                    {% for d in doctors%}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ d.name }}</td>
+                        <td colspan="3" style="width: 50px;"> 
+                            <div class="d-flex justify-content-around">
+                                <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#edit_doc_Backdrop" data-name="{{d.name}}" data-exp="{{d.exp}}" data-des="{{d.description}}" data-fn="{{d.fn_slots}}"data-an="{{d.an_slots}}">
+                                    EDIT
+                                </button>
+                                <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#delete_doc_modal" data-did="{{d.id}}" data-uid="{{d.user_id}}">DELETE</button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5">No Doctors Registered</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <br>
+            <h3>Registered Patients :</h3>
+            <br>
+            <table class="table table-bordered">
+                <thead class="text-center">
+                    <tr>
+                    <th style="width: 100px;">ID</th>
+                    <th style="width: 750px;">PATIENT</th>
+                    <th colspan="3">ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody class="text-center">
+                   {% for p in patients%}
+                   <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ p.username}}</td>
+                    <td colspan="3" style="width: 50px;"> 
+                        <div class="d-flex justify-content-around">
+                            <button class="btn btn-outline-success">EDIT</button>
+                            <button class="btn btn-outline-danger">DELETE</button>
+                        </div>
+                    </td>
+                   </tr>
+                   {% else %}
+                   <tr>
+                    <td colspan="5">No Patients Found !</td>
+                   </tr>
+                   {% endfor %}
+                </tbody>
+            </table>
+            <br>
+            <h3>Upcoming Appointments :</h3>
+            <br>
+            <table class="table table-bordered">
+                <thead class="text-center">
+                    <tr>
+                    <th style="width: 100px;">ID</th>
+                    <th style="width: 570px;">PATIENT </th>
+                    <th style="width: 200px;">DOCTOR</th>
+                    <th>DEPT</th>
+                    <th style="width: 180px;">PATIENT HISTORY</th>
+                    </tr>
+                </thead>
+                <tbody class="text-center">
+                   {% for a in appointments %}
+                   <tr>
+                    <td>{{ a.id }}</td>
+                    <td>{{ a.patient.username }}</td>
+                    <td>{{ a.doctor.name}}</td>
+                    <td>{{a.doctor.department.name}}</td>
+                    <td><button class="btn btn-outline-warning">VIEW</button></td>
+                   </tr>
+                   {% else %}
+                   <tr>
+                    <td colspan="5">No Current Appointments !</td>
+                   </tr>
+                   {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+
+
+
+
+
+        <!-- Modals -->
+            <!-- 1.Create_doc -->
+            <div class="modal fade" id="create_doc_Backdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Enter Doctor Details :</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form action="{{url_for('create_doc')}}" method="POST">
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Name</label>
+                                    <input type="text" class="form-control" placeholder="" name='name'id="name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" placeholder="" name='password'id="password" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="dept" class="form-label">Department</label>
+                                    <input type="text" class="form-control" placeholder="" name='dept'id="dept" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="exp" class="form-label">Experience</label>
+                                    <input type="number" class="form-control" placeholder="" name='exp'id="exp" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="des" class="form-label">Description</label>
+                                    <input style="height: 120px" type="text" class="form-control" placeholder="" name='des'id="des" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="fn" class="form-label">Forenoon Slots</label>
+                                    <input  type="number" class="form-control" placeholder="" name='fn'id="fn" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="an" class="form-label">Afternoon Slots</label>
+                                    <input type="number" class="form-control" placeholder="" name='an'id="an" required>
+                                </div>
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Close</button>
+                                    <button  type="submit" class="btn btn-outline-success d-flex">Create</button>
+                                </div>
+                                
+                            </form>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            <!-- End_Create -->
+            <!-- 2.Edit_Doc -->
+                <div class="modal fade" id="edit_doc_Backdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Enter Updated Details :</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                            <div class="modal-body">
+                                                <form action="{{url_for('edit_doc')}}" method="POST">
+                                                    <input type="hidden" name="name" id="edit-name">
+                                                    <!-- <div class="mb-3">
+                                                        <label for="dept" class="form-label">Department</label>
+                                                        <input type="text" class="form-control" placeholder="" name='dept'id="edit-dept" value="" required>
+                                                    </div> -->
+                                                    <div class="mb-3">
+                                                        <label for="exp" class="form-label">Experience</label>
+                                                        <input type="number" class="form-control" placeholder="" name='exp'id="edit-exp" value="" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="des" class="form-label">Description</label>
+                                                        <input style="height: 120px" type="text" class="form-control" placeholder="" name='des'id="edit-des" value="" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="fn" class="form-label">Forenoon Slots</label>
+                                                        <input  type="number" class="form-control" placeholder="" name='fn'id="edit-fn" value="" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="an" class="form-label">Afternoon Slots</label>
+                                                        <input type="number" class="form-control" placeholder="" name='an'id="edit-an" value="" required>
+                                                    </div>
+                                                    <div class="d-flex justify-content-end gap-2">
+                                                        <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Close</button>
+                                                        <button  type="submit" class="btn btn-outline-success d-flex">Create</button>
+                                                    </div> 
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+            <!-- End_edit -->
+            <!-- 3.Delete_doc -->
+             <div class="modal fade" id="delete_doc_modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Enter Updated Details :</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                        
+                        <div class="modal-body">
+                            <form action="{{url_for('delete_doc')}}" method="POST">
+                                <input type="hidden" name="did" id="did" value="">
+                                <input type="hidden" name="uid" id="uid" value="">
+                                Are you sure? Wanna delete the doctor?
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
+                                    <button  type="submit" class="btn btn-outline-danger d-flex">Delete</button>
+                                </div> 
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End_Delete -->
+         <!-- End_Modals -->
+    </main>
+</body>
+<script>
+  var edit_doc_modal = document.getElementById('edit_doc_Backdrop');//refer modal
+  edit_doc_modal.addEventListener('show.bs.modal', function (event) {//add event default
+    var button = event.relatedTarget; // default
+    var name = button.getAttribute('data-name');//data-name is from button stored to name
+    var exp = button.getAttribute('data-exp') //same^
+    var des =button.getAttribute('data-des')
+    var fn = button.getAttribute('data-fn')
+    var an = button.getAttribute('data-an')
+    document.getElementById('edit-name').value = name;//edit-name is id of hidden input tag. that input's value assigned with the name's value
+    document.getElementById('edit-exp').value = exp;
+    document.getElementById('edit-des').value = des;
+    document.getElementById('edit-an').value = an;
+    document.getElementById('edit-fn').value = fn;
+    });
+    var delete_doc_modal = document.getElementById('delete_doc_modal');//refer modal
+    delete_doc_modal.addEventListener('show.bs.modal', function (event) {//add event default
+    var button = event.relatedTarget; // default
+    var did = button.getAttribute('data-did');
+    var uid = button.getAttribute('data-uid');//data-name is from button stored to name
+    document.getElementById('uid').value = uid;//edit-name is id of hidden input tag. that input's value assigned with the name's value
+    document.getElementById('did').value = did;
+    });
+</script>
+</html>

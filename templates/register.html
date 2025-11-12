@@ -12,7 +12,7 @@
                         <form action="{{url_for('register')}}" method ="POST">
                             <div class="mb-3">
                                 <label for="name" class="form-label">Username</label>
-                                <input type="text" class="form-control" placeholder="Enter unique username" name='name'id="name" required>
+                                <input type="text" class="form-control" placeholder="Enter unique username" name='username'id="username" required>
                             </div>
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email address</label>
@@ -26,7 +26,7 @@
                         </form>
                     </div>
                     <div class="card-footer text-body-secondary">
-                        Already Have an Account? <a href="{{url_for('login')}}">Click Here to Login!</a>
+                        Already Have an Account? <a href="{{url_for('user_login')}}">Click Here to Login!</a>
                     </div>
                 </div>
             </div>

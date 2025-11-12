@@ -1,0 +1,29 @@
+{% extends 'base_pub.html' %}
+
+{% block content %}
+    <section class="vh-100 d-flex align-items-center" style="background-color: #f8f9fa;">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-12 col-md-8 col-lg-6 col-xl-4">
+                <div class="card shadow text-center">
+                    <div class="card-body p-4">
+                    <h3 class="mb-4 text-center">Doctor Login</h3>
+                    <p class="text-center">Enter Valid Credentials</p>
+                    <form action="{{url_for('doc_login')}}" method = "POST">
+                        <div class="mb-3">
+                        <label for="name" class="form-label">Username</label>
+                        <input type="text" class="form-control" name = 'username'id="username" required>
+                        </div>
+                        <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" name = 'password'id="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-dark w-100">Login</button>
+                    </form>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
