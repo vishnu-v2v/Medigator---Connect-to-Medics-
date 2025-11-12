@@ -8,36 +8,48 @@ class User(db.Model):
     username=db.Column(db.String(20),nullable=False,unique=True)
     password=db.Column(db.String(20),nullable=False)
     email=db.Column(db.String(20),unique=True)
-    is_admin=db.Column(db.Boolean,default=False)
+    role=db.Column(db.String(10),default="user")
 
-class Doctors(db.Model):
+
+class Doctor(db.Model):
     __tablename__="Doctors"
     id = db.Column(db.Integer,primary_key=True)
+    user_id = db.Column(db.Integer,db.ForeignKey('Users.id'),unique=True,nullable=False)
     name=db.Column(db.String(20),nullable=False)
-    dept=db.Column(db.String(20),nullable=False)
+    deptid=db.Column(db.String(20),db.ForeignKey('Departments.id'),nullable=False)
     exp = db.Column(db.Integer,nullable=False)
+    description = db.Column(db.String(500),nullable=False)
 
-class Appointments(db.Model):
+    user = db.relationship('User',foreign_keys=[user_id],backref='doctors')
+    department = db.relationship('Department',foreign_keys=[deptid],backref='doctors')
+
+    
+
+class Appointment(db.Model):
     __tablename__="Appointments"
     id = db.Column(db.Integer,primary_key=True)
-    patientid = db.Column(db.Integer,unique=True)
-    doctorid=db.Column(db.Integer,primary_key=True,nullable=False)
-    date = db.Column(db.Integer,primary_key=True,)
-    time = db.Column(db.Integer,primary_key=True)   
-    status = db.Column(db.String(10))
+    patientid = db.Column(db.Integer,db.ForeignKey('Users.id'),nullable=False)
+    doctorid=db.Column(db.Integer,db.ForeignKey('Doctors.id'),nullable=False)
+    date = db.Column(db.Integer,nullable=False)
+    time = db.Column(db.Integer,nullable=False)   
+    status = db.Column(db.String(20),default="Pending")
 
-class Treatments(db.Model):
+    patient = db.relationship('User',foreign_keys=[patientid],backref='appointments')
+    doctor = db.relationship('Doctor',foreign_keys=[doctorid],backref='appointments')
+
+class Treatment(db.Model):
     __tablename__="Treatments"
     id = db.Column(db.Integer,primary_key=True)
-    appointmentid= db.Column(db.Integer,nullable=False,unique=True)
+    appointmentid= db.Column(db.Integer,db.ForeignKey('Appointments.id'),nullable=False,unique=True)
     diagnosis= db.Column(db.String(50))
     prescription= db.Column(db.String(50))
-    Notes = db.Column(db.String(100))
+    notes = db.Column(db.String(100))
 
-class Departments(db.Model):
+    appointment = db.relationship('Appointment',backref='treatment')
+
+class Department(db.Model):
     __tablename__="Departments"
     id = db.Column(db.Integer,primary_key=True)
-    deptid= db.Column(db.Integer,unique=True)
-    deptname=db.Column(db.String(20))
+    name=db.Column(db.String(20),unique=True,nullable=False)
     description=db.Column(db.String(400))
     docsregistered = db.Column(db.Integer)

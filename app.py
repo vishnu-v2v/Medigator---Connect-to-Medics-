@@ -14,11 +14,13 @@ from routes import *
 
 with app.app_context():
     db.create_all()
-    if not User.query.filter_by(name="ADMIN").first():
+    if not User.query.filter_by(username="Admin").first():
         admin = User(
             id = 1,
-            name="ADMIN",
-            password = generate_password_hash("pass")
+            username="Admin",
+            email='admin@dummy.com',
+            password = generate_password_hash("Admin123"),
+            role="admin"
             )
         db.session.add(admin)
         db.session.commit()
