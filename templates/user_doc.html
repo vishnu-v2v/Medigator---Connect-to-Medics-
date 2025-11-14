@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medigator - Connect to Medics!</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .table-fixed {
+            table-layout: fixed;
+            width: 100%;
+        }
+        td {
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <div>
+                <span style="color: aliceblue; font-size: x-large; font-weight: bold;">|</span>
+                |
+                <a style="text-decoration: none; color: aliceblue; font-size: x-large; font-weight: bold;">Doctors :</a>
+                |
+                <span style="color: aliceblue; font-size: x-large; font-weight: bold;">|</span>
+            </div>
+            <form class="d-flex" role="search">
+            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" style="width: 300px;"/>
+            <button class="btn btn-outline-light" type="submit">Search</button>
+            </form>
+            <div>
+                <span style="color: aliceblue; font-size: large; font-weight: bold;">|</span>
+                |
+                <a style="text-decoration: none; color: aliceblue;" href="{{url_for('user_dash',username=username)}}"><span style="font-size: large;">Home</span></a>
+                |
+                <span style="color: aliceblue; font-size: large; font-weight: bold;">|</span>
+                |
+                <a style="text-decoration: none; color: aliceblue;" href="{{url_for('logout')}}"><span style="font-size: large;">Logout</span></a>
+                |
+                <span style="color: aliceblue; font-size: large; font-weight: bold;">|</span>
+            </div>
+            
+        </div>
+    </nav>
+    <main>
+
+    </main>
+    <div class="container mt-5">
+        <h3>Registered Doctors :</h3>
+        <br>
+        <table class="table table-bordered table-fixed">
+            <thead class="text-center">
+                <tr>
+                    <th style="width:100px;">ID</th>
+                    <th style="width: 100px;">DOCTOR</th>
+                    <th style="width: 500px;">DESCRIPTION</th>
+                    <th>DEPARTMENT</th>
+                    <th>EXPERIENCE(yrs)</th>
+                    <th>AVAILABILITY</th>
+                    
+                </tr>
+            </thead>
+            <tbody class="text-center">
+                {% for d in doctors%}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ d.name }}</td>
+                    <td>{{d.description}}</td>
+                    <td>{{d.department.name}}</td>
+                    <td>{{d.exp}}</td>
+                    <td>blah</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5">No Doctors Registered</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+</body>
+</html>

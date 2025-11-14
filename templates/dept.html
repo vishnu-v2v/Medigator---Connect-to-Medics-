@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medigator - Connect to Medics</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .table-fixed {
+            table-layout: fixed;
+            width: 100%;
+        }
+        td {
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <div>
+                <span style="color: aliceblue; font-size: x-large; font-weight: bold;">|</span>
+                |
+                <a style="text-decoration: none; color: aliceblue; font-size: x-large; font-weight: bold;">About Department</a>
+                |
+                <span style="color: aliceblue; font-size: x-large; font-weight: bold;">|</span>
+            </div>
+            <form class="d-flex" role="search">
+            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" style="width: 300px;"/>
+            <button class="btn btn-outline-light" type="submit">Search</button>
+            </form>
+            <div>
+                <span style="color: aliceblue; font-size: large; font-weight: bold;">|</span>
+                |
+                <a style="text-decoration: none; color: aliceblue;" href="{{url_for('user_dash',username=username)}}"><span style="font-size: large;">Home</span></a>
+                |
+                <span style="color: aliceblue; font-size: large; font-weight: bold;">|</span>
+                |
+                <a style="text-decoration: none; color: aliceblue;" href="{{url_for('logout')}}"><span style="font-size: large;">Logout</span></a>
+                |
+                <span style="color: aliceblue; font-size: large; font-weight: bold;">|</span>
+            </div>
+            
+        </div>
+    </nav>
+    <div class="container mt-5">
+        <h2>Department Of {{details.name}} :</h2>
+            <h5>{{details.description}}</h5>
+            <h5>Lorem ipsum dolor sit amet consectetur adipisicing elit. Reiciendis, similique dolore! Rem nostrum consectetur et, labore quibusdam, unde sint perspiciatis iusto expedita vel enim quo rerum inventore ratione eligendi non ipsum ipsam. Eligendi, accusantium dolor. Deserunt doloribus, assumenda repudiandae excepturi natus temporibus voluptates. Quasi, doloribus voluptatibus corporis eligendi expedita adipisci explicabo odit dolorem ad obcaecati quibusdam, quisquam, veniam ullam tenetur sed odio similique facilis sunt ut vitae illum? Dolores consectetur aspernatur quaerat ut enim? Sint, alias modi eum dolores magni, ipsa harum odit quibusdam maxime illum, vitae esse fugit qui corporis rerum nemo sunt. Ea ullam inventore, similique provident consequatur eveniet veniam possimus voluptate alias, sequi deleniti quam! Deserunt repellat temporibus, unde facilis ad eum tempore blanditiis numquam in modi, autem earum? In voluptatibus quae ipsa ducimus quos praesentium non perspiciatis maiores, eligendi optio atque at culpa officiis, ea quisquam et voluptas possimus. Consequatur reprehenderit perferendis quisquam rerum hic recusandae obcaecati aliquid mollitia totam? Repellendus praesentium optio odio architecto fuga nihil cumque, voluptatum atque corporis quae similique doloribus sequi nemo commodi quam, numquam quibusdam sit deleniti quo! Laborum in expedita vitae! Molestiae, veniam nesciunt voluptatibus dignissimos odit corrupti! Expedita fuga totam ab, deleniti ea delectus eos doloribus earum veniam sint.</p>
+            <h5>______________________________________________________________________________________________________________________________________________________________</h5>
+            <br>
+            <h5>
+                {% if details.docsregistered == 1 %}
+                    Currently only {{ details.docsregistered }} doctor is registered in this department.
+                {% elif details.docsregistered >1 %}
+                    Currently {{ details.docsregistered }} doctors are registered in this department.
+                {% else %}
+                    No doctors registered yet!
+                {% endif %}
+                <h5>______________________________________________________________________________________________________________________________________________________________</h5>
+
+                <h3>Registered Doctors :</h3>
+                <br>
+            <table class="table table-bordered table-fixed ">
+                <thead class="text-center">
+                    <tr>
+                        <th style="width:50px;">ID</th>
+                        <th style="width: 150px;">NAME</th>
+                        <th style="width: 420px;">ABOUT</th>
+                        <th style="width: 100px;">EXPERIENCE(yrs)</th>
+                        <th style="width: 150px;">AVAILABLITY</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for d in doctor%}
+                    <tr>
+                        <td class="text-center">{{ loop.index }}</td>
+                        <td class="text-center">{{ d.name }}</td>
+                        <td style="width: 350px;">{{ d.description }}</td>
+                        <td class="text-center">{{ d.exp }}</td>
+                        <td class="text-center">
+                            {% if d.fn_slots > 0 %}
+                            Forenoon : {{d.fn_slots}} Available
+                            {% else %}
+                            Forenoon : Not Available
+                            {% endif %}
+                            {% if d.an_slots > 0 %}
+                            Afternoon : {{d.an_slots}} Available
+                            {% else %}
+                            Afternoon : Not Available
+                            {% endif %}
+                            <p></p>
+                            {% if d.an_slots or d.fn_slots > 0 %}
+                            <button class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#book_modal_{{d.id}}" data-doc="">BOOK</button>
+                            <div class="modal fade" id="book_modal_{{d.id}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Click on the Slot to Book an Appointment</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <container class="mt-4">
+                                            <h3>{{d.name}}'s Availability :</h3>
+                                                <table class=" table text-center">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Date</th>
+                                                            <th>FN Slot </th>
+                                                            <th>AN Slot </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for da in d.available %}
+                                                            <tr>
+                                                                <td>{{ da.date }}</td>
+                                                                <td>
+                                                                {% if not da.is_fn %}
+                                                                    <button class="btn btn-outline-danger" disabled>{{ da.cur_fn }} Slots Available</button>
+                                                                {% else %}
+                                                                    <form action="{{ url_for('book') }}" method="POST" style="display:inline;">
+                                                                    <input type="hidden" name="did" value="{{ d.id }}">
+                                                                    <input type="hidden" name="dept" value="{{ d.department.name }}">
+                                                                    <input type="hidden" name="date" value="{{ da.date }}">
+                                                                    <button type="submit" name="slot_type" value="FN" class="btn btn-outline-success">{{ da.cur_fn }} Slots Available</button>
+                                                                    </form>
+                                                                {% endif %}
+                                                                </td>
+                                                                <td>
+                                                                {% if not da.is_an %}
+                                                                    <button class="btn btn-outline-danger" disabled>{{ da.cur_an }} Slots Available</button>
+                                                                {% else %}
+                                                                    <form action="{{ url_for('book') }}" method="POST" style="display:inline;">
+                                                                    <input type="hidden" name="did" value="{{ d.id }}">
+                                                                    <input type="hidden" name="dept" value="{{ d.department.name }}">
+                                                                    <input type="hidden" name="date" value="{{ da.date }}">
+                                                                    <button type="submit" name="slot_type" value="AN" class="btn btn-outline-success">{{ da.cur_an }} Slots Available</button>
+                                                                    </form>
+                                                                {% endif %}
+                                                                </td>
+                                                            </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                        </container> 
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <button class="btn disabled">BOOK</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5">No Doctors Registered</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </h5>
+        </div>
+
+        <!-- MODALS -->
+         
+    </body>
+
+</html>

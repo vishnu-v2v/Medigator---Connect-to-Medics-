@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medigator - Connect to Medics!</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .table-fixed {
+            table-layout: fixed;
+            width: 100%;
+        }
+        td {
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <div>
+                <span style="color: aliceblue; font-size: x-large; font-weight: bold;">|</span>
+                |
+                <a style="text-decoration: none; color: aliceblue; font-size: x-large; font-weight: bold;">Welcome {{username}}!</a>
+                |
+                <span style="color: aliceblue; font-size: x-large; font-weight: bold;">|</span>
+            </div>
+            
+            <form class="d-flex" role="search">
+            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" style="width: 300px;"/>
+            <button class="btn btn-outline-light" type="submit">Search</button>
+            </form>
+            <div>
+                |
+                <span style="color: aliceblue; font-size: large; font-weight: bold;">|</span>
+                |
+                <a style="text-decoration: none; color: aliceblue;" href="{{url_for('user_doc',username=session.get('username'))}}"><span style="font-size: large;">Doctors</span></a>
+                |
+                <span style="color: aliceblue; font-size: large; font-weight: bold;">|</span>
+                |
+                <a style="text-decoration: none; color: aliceblue;" href="#"><span style="font-size: large;">History</span></a>
+                |
+                <span style="color: aliceblue; font-size: large; font-weight: bold;">|</span>
+                |
+                <a style="text-decoration: none; color: aliceblue;" href="#" data-bs-toggle="modal" data-bs-target="#edit_profile_Backdrop"><span style="font-size: large;">Edit Profile</span></a>
+                |
+                <span style="color: aliceblue; font-size: large; font-weight: bold;">|</span>
+                |
+                <a style="text-decoration: none; color: aliceblue;" href="{{url_for('logout')}}"><span style="font-size: large;">Logout</span></a>
+                |
+                <span style="color: aliceblue; font-size: large; font-weight: bold;">|</span>
+            </div>
+            
+        </div>
+    </nav>
+    
+    <div class="container mt-5">
+        <h3>Upcoming Appointments :</h3>
+        <br>
+        <table class="table table-bordered">
+            <thead class="text-center">
+                <tr>
+                    <th style="width: 100px;">ID</th>
+                    <th style="width: 200px;">DOCTOR</th>
+                    <th style="width: 200px;">DEPT</th>
+                    <th style="width: 180px;">DATE</th>
+                    <th style="width: 150px;">SLOT</th>
+                    <th style="width: 200px;">STATUS</th>
+                </tr>
+            </thead>
+            <tbody class="text-center">
+                {% for a in appointments %}
+                <tr>
+                    <td>{{a.id}}</td>
+                    <td>{{a.doctor.name}}</td>
+                    <td>{{a.doctor.department.name}}</td>
+                    <td>{{a.date}}</td>
+                    <td>{{a.slot}}</td>
+                    <td>{{a.status}}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5">No Current Appointments !</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <br>
+        <h3>Departments :</h3>
+        <table class="table table-bordered">
+            <thead class="text-center">
+                <tr>
+                    <th>ID</th>
+                    <th>NAME</th>
+                    <th>NO OF DOCTORS</th>
+                    <th>ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody class="text-center">
+                {% for dept in departments %}
+                <tr>
+                    <td>{{dept.id}}</td>
+                    <td>{{dept.name}}</td>
+                    <td>{{dept.docsregistered}}</td>
+                    <td><a href="{{url_for('dept',username=username,dept=dept.name)}}" class="btn btn-outline-dark" role="button">VIEW</a></td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4"> No Departments Registered Yet !</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+     <!-- 1.Edit_Doc -->
+        <div class="modal fade" id="edit_profile_Backdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Enter Updated Details :</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                        <div class="modal-body">
+                            <form action="{{url_for('user_dash',username=username)}}" method="POST">
+                                <input type="hidden" name="name" id="edit-name">
+                                <div class="mb-3">
+                                    <label for="username" class="form-label">Username</label>
+                                    <input type="text" class="form-control" placeholder="" name='username'id="edit-un" value="{{username}}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" placeholder="" name='email'id="edit-email" value="{{me.email}}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" placeholder="Enter new password" name='password'id="edit-password" value="" required>
+                                </div>
+                                
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Close</button>
+                                    <button  type="submit" class="btn btn-outline-success d-flex">Edit</button>
+                                </div> 
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    <!-- End_edit -->
+
+</body>
+
+</html>

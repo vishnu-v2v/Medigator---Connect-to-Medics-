@@ -28,7 +28,5 @@ with app.app_context():
     else:
         print("ADMIN EXISTS!")
 
-
-
 if __name__ == '__main__':
     app.run(debug=True)
