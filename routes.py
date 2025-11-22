@@ -2,7 +2,8 @@ from app import app
 from flask import render_template,request,redirect,url_for,flash,session
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import *
-from datetime import datetime
+from datetime import datetime, date, timedelta
+
 @app.route('/',methods=["GET"])
 def home():
     return render_template('home.html')
@@ -12,7 +13,13 @@ def register():
     if request.method=="POST":
         username = request.form['username']
         email = request.form['email']
-        password = generate_password_hash(request.form['password']) 
+        password = generate_password_hash(request.form['password'])
+        fname =request.form['fname']
+        age =request.form['age']
+        gender=request.form['gender']
+        height =request.form['height']
+        weight =request.form['weight']
+
 
         exist_user= User.query.filter_by(username=username).first()
         if exist_user:
@@ -21,7 +28,11 @@ def register():
         
         user = User(username=username, email=email, password=password)
         db.session.add(user)
+        p=User.query.filter_by(username=username).first()
+        patient = Patient(user_id=p.id,fullname=fname,gender=gender,age=age,weight=weight,height=height)
+        db.session.add(patient)
         db.session.commit()
+
         #flash
         return redirect(url_for('user_login'))
     return render_template('register.html')
@@ -34,6 +45,9 @@ def user_login():
 
         exist_user = User.query.filter_by(email=email).first()
         if exist_user and check_password_hash(exist_user.password, password):
+            if exist_user.blacklisted:
+                # flash('Your account has been blacklisted. Please contact admin for further queries.', 'danger')
+                return redirect(url_for('user_login'))
             #flash
             session['ua_id'] = exist_user.id
             session['username']=exist_user.username
@@ -58,20 +72,25 @@ def doc_login():
         exist_user = User.query.filter_by(username=username).first()
         if exist_doctor and check_password_hash(exist_user.password, password):
             #flash
+            if exist_doctor.blacklisted:
+                #flash('Your account has been blacklisted. Please contact admin for further queries.', 'danger')
+                return redirect(url_for('doc_login'))
             session['d_id'] = exist_doctor.id
             session['name']=exist_doctor.name
             session['deptid']=exist_doctor.deptid
             session['exp'] = exist_doctor.exp
             session['role'] = exist_user.role
+
             if not exist_user.role =="doc":
                 #flash
                 return redirect(url_for('home'))
-            return redirect(url_for('doc_dash'))
+            return redirect(url_for('doc_dash',myname=exist_doctor.name))
         else:
             #flash
             return redirect(url_for('user_login'))
 
     return render_template("doc_login.html")
+
 @app.route('/admin_dash',methods=["GET","POST"])
 def admin_dash():
     if not session.get('role') == "admin":
@@ -90,6 +109,24 @@ def admin_dash():
     
     return render_template("admin_dash.html",patients=patients,doctors=doctors,appointments=appointments,departments=departments)
 
+@app.route('/create_dept', methods=['GET', 'POST'])
+def create_dept():
+    if request.method == "POST":
+        name = request.form["name"]
+        description = request.form["des"]
+        
+        exist_dept = Department.query.filter_by(name=name).first()
+        if exist_dept:
+            #flash
+            return redirect(url_for('admin_dashboard'))
+        
+        department = Department(name=name, description=description, docsregistered=0)
+        db.session.add(department)
+        db.session.commit()
+        
+        # flash(f'Department {name} created successfully!', 'success')
+        return redirect(url_for('admin_dash'))
+
 @app.route('/create_doc',methods=["GET","POST"])
 def create_doc():
     if request.method=="POST":
@@ -97,7 +134,7 @@ def create_doc():
         password=request.form["password"]
         des=request.form["des"]
         dept=request.form["dept"]
-        exp=request.form["exp"]
+        exp=request.form["exp"] 
         fn=request.form['fn']
         an=request.form['an']
 
@@ -122,8 +159,8 @@ def create_doc():
 
         t2 = Doctor.query.filter_by(user_id=t1.id).first()
 
-        today = datetime.date.today()
-        week = [today + datetime.timedelta(days=i) for i in range(1,8)]
+        today = date.today()
+        week = [today + timedelta(days=i) for i in range(1,8)]
         for day in week:
             doc_ava = DoctorAvailablitiy(doc_id=t2.id,date=day,cur_fn=t2.fn_slots,cur_an=t2.an_slots)
             db.session.add(doc_ava)
@@ -155,17 +192,114 @@ def edit_doc():
 
 @app.route('/delete_doc',methods=['GET','POST'])
 def delete_doc():
-    if request.method=='POST':
-        uid= request.form['uid']
-        did= request.form['did']
+    if request.method == "POST":
+        uid = request.form['uid']
+        did = request.form['did']
         
-        exist_doc=Doctor.query.filter_by(id=did).first()
-        db.session.delete(exist_doc)
+        exist_doc = Doctor.query.filter_by(id=did).first()
         
-        exist_user=User.query.filter_by(id=uid).first()
-        db.session.delete(exist_user)
-        db.session.commit()
+        if exist_doc:
+            doc_dept = Department.query.filter_by(name=exist_doc.department.name).first()
+            if doc_dept:
+                doc_dept.docsregistered -= 1
+            DoctorAvailablitiy.query.filter_by(doc_id=did).delete()
+            appointments = Appointment.query.filter_by(doctorid=did).all()
+            for appt in appointments:
+                Treatment.query.filter_by(appointmentid=appt.id).delete()
+            Appointment.query.filter_by(doctorid=did).delete()
+            
+            db.session.delete(exist_doc)
+            exist_user = User.query.filter_by(id=uid).first()
+            if exist_user:
+                db.session.delete(exist_user)
+            db.session.commit()
+            #flash
+        #else:
+            #flash
+        
         return redirect(url_for('admin_dash'))
+    
+    return redirect(url_for('admin_dash'))
+
+@app.route('/delete_patient', methods=['POST'])
+def delete_patient():
+    pid = request.form.get('pid')
+    
+    # Get all appointments for this patient
+    appointments = Appointment.query.filter_by(patientid=pid).all()
+    
+    # Delete all treatments associated with these appointments
+    for appointment in appointments:
+        Treatment.query.filter_by(appointmentid=appointment.id).delete()
+    
+    # Delete all appointments for this patient
+    Appointment.query.filter_by(patientid=pid).delete()
+    
+    # Delete the patient
+    patient = User.query.filter_by(id=pid).first()
+    if patient:
+        db.session.delete(patient)
+        db.session.commit()
+        #flash
+    # else:
+    #     flash
+    
+    return redirect(url_for('admin_dash'))
+
+@app.route('/blacklist_doctor', methods=['POST'])
+def blacklist_doctor():
+    did = request.form.get('did')
+    
+    doctor = Doctor.query.filter_by(id=did).first()
+    if doctor:
+        doctor.blacklisted = True
+        db.session.commit()
+        #flash
+    # else:
+    #     flash
+    
+    return redirect(url_for('admin_dash'))
+
+@app.route('/unblacklist_doctor', methods=['POST'])
+def unblacklist_doctor():
+    did = request.form.get('did')
+    
+    doctor = Doctor.query.filter_by(id=did).first()
+    if doctor:
+        doctor.blacklisted = False
+        db.session.commit()
+        #flash
+    # else:
+    #     flash
+    
+    return redirect(url_for('admin_dash'))
+
+@app.route('/blacklist_patient', methods=['POST'])
+def blacklist_patient():
+    pid = request.form.get('pid')
+    
+    patient = User.query.filter_by(id=pid).first()
+    if patient:
+        patient.blacklisted = True
+        db.session.commit()
+        #flash
+    # else:
+    #     flash
+    
+    return redirect(url_for('admin_dash'))
+
+@app.route('/unblacklist_patient', methods=['POST'])
+def unblacklist_patient():
+    pid = request.form.get('pid')
+    
+    patient = User.query.filter_by(id=pid).first()
+    if patient:
+        patient.blacklisted = False
+        db.session.commit()
+        #flash
+    # else:
+    #     #flasha
+    
     return redirect(url_for('admin_dash'))
 
 @app.route('/user_dash/<username>',methods=["GET","POST"])
@@ -236,20 +370,50 @@ def book():
         db.session.commit()
         return redirect(url_for('dept',username=session.get('username'),dept=dept))
 
-@app.route('/doc_dash',methods=["GET","POST"])
-def doc_dash():
+@app.route('/doc_dash/<myname>',methods=["GET","POST"])
+def doc_dash(myname):
     if session.get('role') != "doc":
         #flash
         return redirect(url_for('user_dash',username=session.get('username')))
     if 'd_id' not in session:
         #flash
         return redirect(url_for('home'))
+    appoint=Appointment.query.filter_by(doctorid=session.get('d_id')).all()
     
     
     
-    return render_template("doc_dash.html")
+    return render_template("doc_dash.html",me=myname,appointments=appoint)
+
+@app.route('/update',methods=['POST'])
+def update():
+    if request.method=='POST':
+        appid=request.form['appid']
+        diag=request.form['diag']
+        pres=request.form['pres']
+        notes=request.form['notes']
+        treat=Treatment(appointmentid=appid,diagnosis=diag,prescription=pres,notes=notes)
+        db.session.add(treat)
+        db.session.commit()
+    return redirect(url_for('doc_dash',myname=session.get('name')))
+
+@app.route('/mark',methods=['POST'])
+def mark():
+    # if session.get('role') != "doc":
+    #     #flash
+    #     return redirect(url_for('user_dash',username=session.get('username')))
+    # if 'd_id' not in session:
+    #     #flash
+    #     return redirect(url_for('home'))
+    
+    if request.method=='POST':
+        appid=request.form['appid']
+        appoint=Appointment.query.filter_by(id=appid).first()
+        appoint.status='COMPLETED'
+        db.session.commit()
+        n=session.get('name')
+    return redirect(url_for('doc_dash',myname=n))    
 
 @app.route('/logout')
-def logout():
+def logout():   
     session.clear()
     return redirect(url_for('home'))

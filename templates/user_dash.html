@@ -6,16 +6,7 @@
     <title>Medigator - Connect to Medics!</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <style>
-        .table-fixed {
-            table-layout: fixed;
-            width: 100%;
-        }
-        td {
-            word-break: break-word;
-            overflow-wrap: break-word;
-        }
-    </style>
+    
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -82,7 +73,7 @@
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="5">No Current Appointments !</td>
+                    <td colspan="6">No Current Appointments !</td>
                 </tr>
                 {% endfor %}
             </tbody>

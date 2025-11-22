@@ -54,12 +54,12 @@
         <table class="table table-bordered table-fixed">
             <thead class="text-center">
                 <tr>
-                    <th style="width:100px;">ID</th>
+                    <th style="width:50px;">ID</th>
                     <th style="width: 100px;">DOCTOR</th>
-                    <th style="width: 500px;">DESCRIPTION</th>
-                    <th>DEPARTMENT</th>
-                    <th>EXPERIENCE(yrs)</th>
-                    <th>AVAILABILITY</th>
+                    <th style="width: 300px;">DESCRIPTION</th>
+                    <th style="width: 150px;">DEPARTMENT</th>
+                    <th style="width: 150px;">EXPERIENCE(yrs)</th>
+                    <th style="width: 150px;">AVAILABILITY</th>
                     
                 </tr>
             </thead>
@@ -71,7 +71,80 @@
                     <td>{{d.description}}</td>
                     <td>{{d.department.name}}</td>
                     <td>{{d.exp}}</td>
-                    <td>blah</td>
+                    <td class="text-center">
+                            {% if d.fn_slots > 0 %}
+                            Forenoon : {{d.fn_slots}} Available
+                            {% else %}
+                            Forenoon : Not Available
+                            {% endif %}
+                            {% if d.an_slots > 0 %}
+                            Afternoon : {{d.an_slots}} Available
+                            {% else %}
+                            Afternoon : Not Available
+                            {% endif %}
+                            <p></p>
+                            {% if d.an_slots or d.fn_slots > 0 %}
+                            <button class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#book_modal_{{d.id}}" data-doc="">BOOK</button>
+                            <div class="modal fade" id="book_modal_{{d.id}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Click on the Slot to Book an Appointment</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <container class="mt-4">
+                                            <h3>{{d.name}}'s Availability :</h3>
+                                                <table class=" table text-center">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Date</th>
+                                                            <th>FN Slot </th>
+                                                            <th>AN Slot </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for da in d.available %}
+                                                            <tr>
+                                                                <td>{{ da.date }}</td>
+                                                                <td>
+                                                                {% if not da.is_fn %}
+                                                                    <button class="btn btn-outline-danger" disabled>{{ da.cur_fn }} Slots Available</button>
+                                                                {% else %}
+                                                                    <form action="{{ url_for('book') }}" method="POST" style="display:inline;">
+                                                                    <input type="hidden" name="did" value="{{ d.id }}">
+                                                                    <input type="hidden" name="dept" value="{{ d.department.name }}">
+                                                                    <input type="hidden" name="date" value="{{ da.date }}">
+                                                                    <button type="submit" name="slot_type" value="FN" class="btn btn-outline-success">{{ da.cur_fn }} Slots Available</button>
+                                                                    </form>
+                                                                {% endif %}
+                                                                </td>
+                                                                <td>
+                                                                {% if not da.is_an %}
+                                                                    <button class="btn btn-outline-danger" disabled>{{ da.cur_an }} Slots Available</button>
+                                                                {% else %}
+                                                                    <form action="{{ url_for('book') }}" method="POST" style="display:inline;">
+                                                                    <input type="hidden" name="did" value="{{ d.id }}">
+                                                                    <input type="hidden" name="dept" value="{{ d.department.name }}">
+                                                                    <input type="hidden" name="date" value="{{ da.date }}">
+                                                                    <button type="submit" name="slot_type" value="AN" class="btn btn-outline-success">{{ da.cur_an }} Slots Available</button>
+                                                                    </form>
+                                                                {% endif %}
+                                                                </td>
+                                                            </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                        </container> 
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <button class="btn disabled">BOOK</button>
+                            {% endif %}
+                    </td>
+
                 </tr>
                 {% else %}
                 <tr>

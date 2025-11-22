@@ -4,7 +4,7 @@
     <div class="container">
         <div class="row justify-content-center my-25 " style="margin-top: 200px; margin-bottom: 32px;">
             <div class="col-11 col-md-6 col-lg-4">
-                <div class="card shadow text-center">
+                <div class="card shadow ">
                     <div class="card-header">
                         <h3>Register</h3>
                     </div>
@@ -22,6 +22,33 @@
                                 <label for="password" class="form-label">Password</label>
                                 <input type="password" class="form-control" placeholder="Enter your password" name='password'id="password" required>
                             </div>
+                                <label for="fname" class="form-label">Fullname</label>
+                                <input type="text" class="form-control" placeholder="Enter Fullname" name='fname'id="fname" required>
+                            <div class="container ">
+                            <div class="row">
+                                <div class="col">
+                                    <label>Gender:</label><br>
+                                    <input type="radio" name="gender" value="Male" required> Male<br>
+                                    <input type="radio" name="gender" value="Female"> Female<br>
+                                    <input type="radio" name="gender" value="Other"> Other<br>
+                                </div>
+                                <div class="col">
+                                    <label for="age" class="form-label">Age</label>
+                                    <input type="number" class="form-control" placeholder="Enter your age" name='age'id="age" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <label for="height" class="form-label">Height</label>
+                                    <input type="number" class="form-control" placeholder="in cms" name='height'id="height" required>
+                                </div>
+                                <div class="col">
+                                    <label for="weight" class="form-label">Weight</label>
+                                    <input type="number" class="form-control" placeholder="in kgs" name='weight'id="weight" required>
+                                </div>
+                            </div>
+                            </div>
+                            <br>
                             <button type="submit" class="btn btn-dark w-100">Register</button>
                         </form>
                     </div>

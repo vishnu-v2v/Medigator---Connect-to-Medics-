@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-
+from datetime import date
 db = SQLAlchemy()
 
 class User(db.Model):
@@ -9,6 +9,17 @@ class User(db.Model):
     password=db.Column(db.String(30),nullable=False)
     email=db.Column(db.String(30))
     role=db.Column(db.String(10),default="user")
+    blacklisted = db.Column(db.Boolean, default=False)
+
+class Patient(db.Model):
+    __tablename__="Patients"
+    id=db.Column(db.Integer,primary_key=True)
+    user_id=db.Column(db.Integer,db.ForeignKey('Users.id'),unique=True,nullable=False)
+    fullname = db.Column(db.String(30),nullable=False)
+    gender=db.Column(db.String(10),nullable=False)
+    age = db.Column(db.Integer,nullable=False)
+    weight = db.Column(db.Integer,nullable=False)
+    height = db.Column(db.Integer, nullable=False)
 
 
 class Doctor(db.Model):
@@ -21,6 +32,7 @@ class Doctor(db.Model):
     description = db.Column(db.String(500),nullable=False)
     fn_slots = db.Column(db.Integer,nullable=False)
     an_slots = db.Column(db.Integer,nullable=False)
+    blacklisted = db.Column(db.Boolean, default=False)
 
     user = db.relationship('User',foreign_keys=[user_id],backref='doctors')
     department = db.relationship('Department',foreign_keys=[deptid],backref='doctors')
@@ -51,7 +63,7 @@ class Appointment(db.Model):
     doctorid=db.Column(db.Integer,db.ForeignKey('Doctors.id'),nullable=False)
     date = db.Column(db.Date,nullable=False)
     slot = db.Column(db.String,nullable=False)  
-    status = db.Column(db.String(20),default="Confirmed")
+    status = db.Column(db.String(20),default="In Progress")
 
     patient = db.relationship('User',foreign_keys=[patientid],backref='appointments')
     doctor = db.relationship('Doctor',foreign_keys=[doctorid],backref='appointments')
@@ -59,8 +71,9 @@ class Appointment(db.Model):
 class Treatment(db.Model):
     __tablename__="Treatments"
     id = db.Column(db.Integer,primary_key=True)
-    appointmentid= db.Column(db.Integer,db.ForeignKey('Appointments.id'),nullable=False,unique=True)
-    diagnosis= db.Column(db.String(50))
+    dou=db.Column(db.Date,nullable=False,default=date.today())
+    appointmentid= db.Column(db.Integer,db.ForeignKey('Appointments.id'),nullable=False)
+    diagnosis = db.Column(db.String(50),default="Not Yet Diagnised")
     prescription= db.Column(db.String(50))
     notes = db.Column(db.String(100))
 

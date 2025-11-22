@@ -4,6 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from models import *
 
 
+
 app= Flask(__name__)
 app.config["SECRET_KEY"] = "MyKey"
 app.config["SQLALCHEMY_DATABASE_URI"]= "sqlite:///HMS.db"

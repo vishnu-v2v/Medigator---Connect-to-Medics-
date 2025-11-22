@@ -24,7 +24,7 @@
             <div>
                 <span style="color: aliceblue; font-size: large; font-weight: bold;">|</span>
                 |
-                <a style="text-decoration: none; color: aliceblue;" href="#dept"><span style="font-size: large;">Departments</span></a>
+                <a style="text-decoration: none; color: aliceblue;" href="#appoint"><span style="font-size: large;">Appointments</span></a>
                 |
                 <span style="color: aliceblue; font-size: large; font-weight: bold;">|</span>
                 |
@@ -37,6 +37,33 @@
     </nav>
     <main>
         <div class="container mt-5">
+            <div class="d-flex justify-content-between">
+                <h3>Departments :</h3>
+                <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#create_dept_Backdrop">CREATE</button>
+            </div>
+            <br>
+            <table class="table table-bordered">
+                <thead class="text-center">
+                    <tr>
+                        <th>ID</th>
+                        <th>NAME</th>
+                        <th>NO OF DOCTORS</th>
+                    </tr>
+                </thead>
+                <tbody class="text-center">
+                    {% for dept in departments %}
+                    <tr>
+                        <td>{{dept.id}}</td>
+                        <td>{{dept.name}}</td>
+                        <td>{{dept.docsregistered}}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3"> No Departments Registered Yet !</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
             <div class="d-flex justify-content-between">
                 <h3>Registered Doctors :</h3> <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#create_doc_Backdrop">CREATE</button>
                 
@@ -60,6 +87,11 @@
                                 <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#edit_doc_Backdrop" data-name="{{d.name}}" data-exp="{{d.exp}}" data-des="{{d.description}}" data-fn="{{d.fn_slots}}"data-an="{{d.an_slots}}">
                                     EDIT
                                 </button>
+                                {% if d.blacklisted %}
+                                <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#unblacklist_doc_modal" data-did="{{d.id}}" data-uid="{{d.user_id}}">UNBLACKLIST</button>
+                                {% else %}
+                                <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#blacklist_doc_modal" data-did="{{d.id}}" data-uid="{{d.user_id}}">BLACKLIST</button>
+                                {% endif %}
                                 <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#delete_doc_modal" data-did="{{d.id}}" data-uid="{{d.user_id}}">DELETE</button>
                             </div>
                         </td>
@@ -89,8 +121,12 @@
                     <td>{{ p.username}}</td>
                     <td colspan="3" style="width: 50px;"> 
                         <div class="d-flex justify-content-around">
-                            <button class="btn btn-outline-success">EDIT</button>
-                            <button class="btn btn-outline-danger">DELETE</button>
+                            {% if p.blacklisted %}
+                            <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#unblacklist_patient_modal" data-pid="{{p.id}}" >UNBLACKLIST</button>
+                            {% else %}
+                            <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#blacklist_patient_modal" data-pid="{{p.id}}" >BLACKLIST</button>
+                            {% endif %}
+                            <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#delete_patient_modal" data-pid="{{p.id}}" >DELETE</button>
                         </div>
                     </td>
                    </tr>
@@ -102,7 +138,7 @@
                 </tbody>
             </table>
             <br>
-            <h3>Upcoming Appointments :</h3>
+            <h3 id="appoint">Upcoming Appointments :</h3>
             <br>
             <table class="table table-bordered">
                 <thead class="text-center">
@@ -130,30 +166,7 @@
                    {% endfor %}
                 </tbody>
             </table>
-            <h3 id="dept" >Departments :</h3>
-            <br>
-            <table class="table table-bordered">
-                <thead class="text-center">
-                    <tr>
-                        <th>ID</th>
-                        <th>NAME</th>
-                        <th>NO OF DOCTORS</th>
-                    </tr>
-                </thead>
-                <tbody class="text-center">
-                    {% for dept in departments %}
-                    <tr>
-                        <td>{{dept.id}}</td>
-                        <td>{{dept.name}}</td>
-                        <td>{{dept.docsregistered}}</td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="3"> No Departments Registered Yet !</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-        </table>
+            
         </div>
         
 
@@ -163,6 +176,34 @@
 
 
         <!-- Modals -->
+            <!-- create_dept -->
+             <div class="modal fade" id="create_dept_Backdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Enter Department Details :</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form action="{{url_for('create_dept')}}" method="POST">
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Name</label>
+                                    <input type="text" class="form-control" placeholder="" name="name" id="name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="des" class="form-label">Description</label>
+                                    <input style="height: 120px" type="text" class="form-control" placeholder="" name="des" id="des" required>
+                                </div>
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-outline-success d-flex">Create</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+             <!-- End_Create -->
             <!-- 1.Create_doc -->
             <div class="modal fade" id="create_doc_Backdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                     <div class="modal-dialog">
@@ -277,6 +318,125 @@
                 </div>
             </div>
             <!-- End_Delete -->
+             <!-- 4.Patient_delete -->
+              <div class="modal fade" id="delete_patient_modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Enter Updated Details :</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form action="{{url_for('delete_patient')}}" method="POST">
+                                <input type="hidden" name="pid" id="patient-pid" value="">
+                                Are you sure? Wanna delete the patient?
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-outline-danger d-flex">Delete</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+              <!-- End_delete -->
+               <!-- black_doc_modal -->
+                <div class="modal fade" id="blacklist_doc_modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="staticBackdropLabel">Blacklist Doctor</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="{{url_for('blacklist_doctor')}}" method="POST">
+                                    <input type="hidden" name="did" id="blacklist-doc-did" value="">
+                                    <input type="hidden" name="uid" id="blacklist-doc-uid" value="">
+                                    <p>Are you sure you want to blacklist this doctor?</p>
+                                    <p class="text-danger"><strong>They will not be able to login until unblacklisted.</strong></p>
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-outline-danger d-flex">Blacklist</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End_black_modal -->
+
+                <!--ublack _doc_modal -->
+                <div class="modal fade" id="unblacklist_doc_modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="staticBackdropLabel">Unblacklist Doctor</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="{{url_for('unblacklist_doctor')}}" method="POST">
+                                    <input type="hidden" name="did" id="unblacklist-doc-did" value="">
+                                    <input type="hidden" name="uid" id="unblacklist-doc-uid" value="">
+                                    <p>Are you sure you want to unblacklist this doctor?</p>
+                                    <p class="text-success"><strong>They will be able to login again.</strong></p>
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-outline-success d-flex">Unblacklist</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End_unblack_modal -->
+
+                <!-- black_pat_modal -->
+                <div class="modal fade" id="blacklist_patient_modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="staticBackdropLabel">Blacklist Patient</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="{{url_for('blacklist_patient')}}" method="POST">
+                                    <input type="hidden" name="pid" id="blacklist-patient-pid" value="">
+                                    <p>Are you sure you want to blacklist this patient?</p>
+                                    <p class="text-danger"><strong>They will not be able to login until unblacklisted.</strong></p>
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-outline-danger d-flex">Blacklist</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End_black_pat_modal -->
+
+                <!-- unblack_pat_modal -->
+                <div class="modal fade" id="unblacklist_patient_modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="staticBackdropLabel">Unblacklist Patient</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="{{url_for('unblacklist_patient')}}" method="POST">
+                                    <input type="hidden" name="pid" id="unblacklist-patient-pid" value="">
+                                    <p>Are you sure you want to unblacklist this patient?</p>
+                                    <p class="text-success"><strong>They will be able to login again.</strong></p>
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-outline-success d-flex">Unblacklist</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End-unlack_Modal -->
          <!-- End_Modals -->
     </main>
 </body>
@@ -302,6 +462,46 @@
     var uid = button.getAttribute('data-uid');//data-name is from button stored to name
     document.getElementById('uid').value = uid;//edit-name is id of hidden input tag. that input's value assigned with the name's value
     document.getElementById('did').value = did;
+    });
+
+    // Delete Patient Modal
+    var delete_patient_modal = document.getElementById('delete_patient_modal');
+    delete_patient_modal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var pid = button.getAttribute('data-pid');
+        
+        document.getElementById('patient-pid').value = pid;
+    });
+
+    var blacklist_doc_modal = document.getElementById('blacklist_doc_modal');
+    blacklist_doc_modal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var did = button.getAttribute('data-did');
+        document.getElementById('blacklist-doc-did').value = did;
+    });
+
+    // Unblacklist Doctor Modal
+    var unblacklist_doc_modal = document.getElementById('unblacklist_doc_modal');
+    unblacklist_doc_modal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var did = button.getAttribute('data-did');
+        document.getElementById('unblacklist-doc-did').value = did;
+    });
+
+    // Blacklist Patient Modal
+    var blacklist_patient_modal = document.getElementById('blacklist_patient_modal');
+    blacklist_patient_modal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var pid = button.getAttribute('data-pid');
+        document.getElementById('blacklist-patient-pid').value = pid;
+    });
+
+    // Unblacklist Patient Modal
+    var unblacklist_patient_modal = document.getElementById('unblacklist_patient_modal');
+    unblacklist_patient_modal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var pid = button.getAttribute('data-pid');
+        document.getElementById('unblacklist-patient-pid').value = pid;
     });
 </script>
 </html>
