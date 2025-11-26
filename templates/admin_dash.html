@@ -6,6 +6,30 @@
     <title>Medigator - Connect to Medic !</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .chart-box {
+            width: 45%;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        canvas {
+            width: 480px !important;
+            height: 480px !important;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -17,10 +41,7 @@
                 |
                 <span style="color: aliceblue; font-size: x-large; font-weight: bold;">|</span>
             </div>
-            <form class="d-flex" role="search">
-                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" style="width: 300px;"/>
-                <button class="btn btn-outline-light" type="submit">Search</button>
-            </form>
+            <input type="text" id="search" placeholder="Search" class="form-control me-2 " aria-label="Search" style="width: 300px;">
             <div>
                 <span style="color: aliceblue; font-size: large; font-weight: bold;">|</span>
                 |
@@ -42,7 +63,7 @@
                 <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#create_dept_Backdrop">CREATE</button>
             </div>
             <br>
-            <table class="table table-bordered">
+            <table class="table table-bordered" id="s1">
                 <thead class="text-center">
                     <tr>
                         <th>ID</th>
@@ -69,11 +90,12 @@
                 
             </div>
             <br>
-            <table class="table table-bordered">
+            <table class="table table-bordered" id="s2">
                 <thead class="text-center">
                     <tr>
                         <th style="width:100px;">ID</th>
-                        <th style="width: 750px;">DOCTOR</th>
+                        <th style="width: 375px;">DOCTOR</th>
+                        <th style="width: 375px;">DEPT</th>
                         <th colspan="3" style="width:100px;">ACTIONS</th>
                     </tr>
                 </thead>
@@ -82,6 +104,7 @@
                     <tr>
                         <td>{{ loop.index }}</td>
                         <td>{{ d.name }}</td>
+                        <td>{{d.department.name}}</td>
                         <td colspan="3" style="width: 50px;"> 
                             <div class="d-flex justify-content-around">
                                 <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#edit_doc_Backdrop" data-name="{{d.name}}" data-exp="{{d.exp}}" data-des="{{d.description}}" data-fn="{{d.fn_slots}}"data-an="{{d.an_slots}}">
@@ -106,11 +129,11 @@
             <br>
             <h3>Registered Patients :</h3>
             <br>
-            <table class="table table-bordered">
+            <table class="table table-bordered" id="s3">
                 <thead class="text-center">
                     <tr>
                     <th style="width: 100px;">ID</th>
-                    <th style="width: 750px;">PATIENT</th>
+                    <th style="width: 600px;">PATIENT</th>
                     <th colspan="3">ACTIONS</th>
                     </tr>
                 </thead>
@@ -140,13 +163,13 @@
             <br>
             <h3 id="appoint">Upcoming Appointments :</h3>
             <br>
-            <table class="table table-bordered">
+            <table class="table table-bordered" id="s4">
                 <thead class="text-center">
                     <tr>
                     <th style="width: 100px;">ID</th>
-                    <th style="width: 570px;">PATIENT </th>
-                    <th style="width: 200px;">DOCTOR</th>
-                    <th>DEPT</th>
+                    <th style="width: 250px;">PATIENT </th>
+                    <th style="width: 250px;">DOCTOR</th>
+                    <th style="width: 250px;">DEPT</th>
                     <th style="width: 180px;">PATIENT HISTORY</th>
                     </tr>
                 </thead>
@@ -168,13 +191,8 @@
             </table>
             
         </div>
+        <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#chart1_modal"  >CHART 1</button>
         
-
-
-
-
-
-
         <!-- Modals -->
             <!-- create_dept -->
              <div class="modal fade" id="create_dept_Backdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -437,8 +455,27 @@
                     </div>
                 </div>
                 <!-- End-unlack_Modal -->
+                 <div class="modal fade" id="chart1_modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog  modal-fullscreen">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="staticBackdropLabel">Unblacklist Patient</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="chart-container">
+                                    <div class="chart-box">
+                                        <h3>User Attempts per Subject</h3>
+                                        <canvas id="adminChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
          <!-- End_Modals -->
     </main>
+
 </body>
 <script>
   var edit_doc_modal = document.getElementById('edit_doc_Backdrop');//refer modal
@@ -503,5 +540,36 @@
         var pid = button.getAttribute('data-pid');
         document.getElementById('unblacklist-patient-pid').value = pid;
     });
+
+    document.getElementById("search").addEventListener("keyup", function() {
+    let filter = this.value.toLowerCase();
+    ['s1','s2','s3','s4'].forEach(sid => {
+       let rows = document.querySelectorAll(`#${sid} tbody tr`);
+        rows.forEach(row => {
+            let text = row.textContent.toLowerCase();
+            row.style.display = text.includes(filter) ? "" : "none";
+        }); 
+    });      
+});
+
+
+// Chart
+
+const ctx = document.getElementById('adminChart');
+
+new Chart(ctx, {
+    type: 'pie',
+    data: {
+        labels: ['Appointments', 'Patients', 'Doctors'],
+        datasets: [{
+            label: 'Admin Overview',
+            data: [{{ total_appointments }},{{ active_patients }},{{ doctorss }}],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: { y: { beginAtZero: true } }
+    }
+});
 </script>
 </html>

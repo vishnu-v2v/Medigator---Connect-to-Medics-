@@ -106,8 +106,14 @@ def admin_dash():
     appointments = Appointment.query.all()
     departments=Department.query.all()
     
+    total_appointments = Appointment.query.count()
+    active_patients = Patient.query.count()
+    doctorss = Doctor.query.count()
     
-    return render_template("admin_dash.html",patients=patients,doctors=doctors,appointments=appointments,departments=departments)
+
+    return render_template("admin_dash.html",patients=patients,doctors=doctors,appointments=appointments,departments=departments,total_appointments=total_appointments,
+        active_patients=active_patients,
+        doctorss=doctorss)
 
 @app.route('/create_dept', methods=['GET', 'POST'])
 def create_dept():
@@ -329,11 +335,21 @@ def user_dash(username):
         return redirect(url_for('user_login'))
     
     
-    patient=User.query.filter_by(id=session.get('ua_id')).first()
+    patient=Patient.query.filter_by(user_id=session.get('ua_id')).first()
     appointments=Appointment.query.filter_by(patientid=patient.id).all()
     departments=Department.query.all()
 
-    return render_template("user_dash.html",username=username,me=patient,appointments=appointments,departments=departments)
+    chart_treat = Treatment.query.join(Appointment).filter(
+        Appointment.patientid == patient.id
+    ).all()
+
+    dates = [t.dou.strftime("%Y-%m-%d") for t in chart_treat]
+    labels = dates
+    counts = list(range(1, len(chart_treat) + 1))
+    print(dates)
+    print(labels)
+    print(counts)
+    return render_template("user_dash.html",username=username,me=patient,appointments=appointments,departments=departments,labels=labels,counts=counts)
 
 @app.route('/user_dash/<username>/Doctors')
 def user_doc(username):
@@ -357,7 +373,8 @@ def book():
         date=request.form['date']
         date_obj = datetime.strptime(date, '%Y-%m-%d').date()
         
-        appoint  = Appointment(patientid=session.get('ua_id'),doctorid=id,date=date_obj,slot=slot)
+        pat=Patient.query.filter_by(user_id=session.get('ua_id')).first()
+        appoint  = Appointment(patientid=pat.id,doctorid=id,date=date_obj,slot=slot)
         db.session.add(appoint)
         db.session.commit()
 
@@ -379,10 +396,14 @@ def doc_dash(myname):
         #flash
         return redirect(url_for('home'))
     appoint=Appointment.query.filter_by(doctorid=session.get('d_id')).all()
+    pids = set([a.patientid for a in appoint])
+    patients = Patient.query.filter(Patient.id.in_(pids)).all()
     
-    
-    
-    return render_template("doc_dash.html",me=myname,appointments=appoint)
+    fcount = Appointment.query.filter_by(doctorid=session.get('d_id'), slot='FN').count()
+    acount = Appointment.query.filter_by(doctorid=session.get('d_id'), slot='AN').count()
+    print(fcount)
+    print(acount)
+    return render_template("doc_dash.html",me=myname,appointments=appoint,patients=patients,fcount=fcount,acount=acount)
 
 @app.route('/update',methods=['POST'])
 def update():
@@ -407,8 +428,16 @@ def mark():
     
     if request.method=='POST':
         appid=request.form['appid']
+        d=request.form['date']
+        did=request.form['did']
+        slot=request.form['slot_type']
         appoint=Appointment.query.filter_by(id=appid).first()
-        appoint.status='COMPLETED'
+        davai=DoctorAvailablitiy.query.filter_by(doc_id=did,date=d).first()
+        appoint.status='Completed'
+        if slot == 'FN':
+            davai.cur_fn+=1
+        elif slot =='AN':
+            davai.cur_an+=1
         db.session.commit()
         n=session.get('name')
     return redirect(url_for('doc_dash',myname=n))    
@@ -416,4 +445,5 @@ def mark():
 @app.route('/logout')
 def logout():   
     session.clear()
+    flash("You have logged out successfully...!","info")
     return redirect(url_for('home'))
