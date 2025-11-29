@@ -50,34 +50,39 @@
                 <span style="color: aliceblue; font-size: x-large; font-weight: bold;">|</span>
             </div>
             <form class="d-flex" role="search">
-            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" style="width: 300px;"/>
-            <button class="btn btn-outline-light" type="submit">Search</button>
+            <input class="form-control me-2" id="search" type="search" placeholder="Search" aria-label="Search" style="width: 300px;"/>
             </form>
             <div>
+                <span style="color: aliceblue; font-size: large; font-weight: bold;">|</span>
+                |
+                <a style="text-decoration: none; color: aliceblue;" href="" data-bs-toggle="modal" data-bs-target="#chart_modal " ><span style="font-size: large;">Summary</span></a>
+                |
                 <span style="color: aliceblue; font-size: large; font-weight: bold;">|</span>
                 |
                 <a style="text-decoration: none; color: aliceblue;" href="{{url_for('logout')}}"><span style="font-size: large;">Logout</span></a>
                 |
                 <span style="color: aliceblue; font-size: large; font-weight: bold;">|</span>
+                |
             </div>
         </div>
     </nav>
-    <div class="container mt-5">
+    <div class="container mt-5" >
         <h3>Upcoming Appointments :</h3>
         <br>
-        <table class="table table-bordered table-fixed">
+        <table class="table table-bordered table-fixed" id="s1">
             <thead class="text-center">
                 <tr>
                     <th style="width: 100px;">ID</th>
-                    <th style="width: 200px;">PATIENT</th>
-                    <th style="width: 180px;">DATE</th>
-                    <th style="width: 150px;">SLOT</th>
-                    <th style="width: 200px;">STATUS</th>
-                    <th style="width: 200px;">ACTIONS</th>
+                    <th style="width: 100px;">PATIENT</th>
+                    <th style="width: 100px;">DATE</th>
+                    <th style="width: 100px;">SLOT</th>
+                    <th style="width: 150px;">STATUS</th>
+                    <th style="width: 250px;">ACTIONS</th>
                 </tr>
             </thead>
             <tbody class="text-center">
-                {% for a in appointments %}
+                {% for a in appointments if a.status not in ["Completed","Cancelled"] %}
+                    
                  <!-- update_modal -->
                 <div class="modal fade" id="update_modal_{{a.id}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                     <div class="modal-dialog">
@@ -165,15 +170,20 @@
                             <input type="hidden" name="date" value="{{a.date}}">
                             <input type="hidden" name="did" value="{{a.doctorid}}" id="">
                             {% if a.slot=="FN" %}
-                            <button type="submit" name="slot_type" value="FN" class="btn btn-outline-success">COMPLETE</button>
+                            <button type="submit" name="slot_type" value="FN" class="btn btn-outline-success" onclick="return confirm('Are you sure? you wanna continue?');">COMPLETE</button>
+                            <button type="submit" name="cancel" value="FN" class="btn btn-outline-danger" onclick="return confirm('Are you sure? You want to cancel?');">CANCEL</button>
                             {% else %}
-                            <button type="submit" name="slot_type" value="AN" class="btn btn-outline-success">COMPLETE</button>
+                            <button type="submit" name="slot_type" value="AN" class="btn btn-outline-success" onclick="return confirm('Are you sure? You want to continue?');">COMPLETE</button>
+                            <button type="submit" name="cancel" value="AN" class="btn btn-outline-danger" onclick="return confirm('Are you sure? You want to cancel?');">CANCEL</button>
                             {% endif %}
+                            <input type="hidden" name="slot_type" value="">
+                            <input type="hidden" name="cancel" value="">
                         </form>
                         {% endif %}
 
                     </td>
                 </tr>
+                
                 {% else %}
                 <tr>
                     <td colspan="6">No Current Appointments !</td>
@@ -184,7 +194,7 @@
         <br>
         <h3>About Patients:</h3>
         <br>
-        <table class="table table-bordered">
+        <table class="table table-bordered" id="s2">
             <thead class="text-center">
                 <tr>
                     <th style="width: 100px;">ID</th>
@@ -230,6 +240,10 @@
                                                             <td>{{t.prescription}}</td>
                                                             <td>{{t.notes}}</td>
                                                         </tr>
+                                                        {% else %}
+                                                        <tr>
+                                                            <td colspan="4">No Treatments Yet!</td>
+                                                        </tr>
                                                         {% endfor %}
                                                     {% endfor %}
                                                 </tbody>
@@ -248,19 +262,48 @@
                 {% endfor %}
             </tbody>
         </table>
+        <br>
+        <h3>Past Appointments :</h3>
+        <br>
+        <table class="table table-bordered table-fixed" id="s3">
+            <thead class="text-center">
+                <tr>
+                    <th style="width: 150px;">ID</th>
+                    <th style="width: 150px;">PATIENT</th>
+                    <th style="width: 150px;">COMMENCED</th>
+                    <th style="width: 150px;">SLOT</th>
+                    <th style="width: 150px;">ENDED</th>
+                </tr>
+            </thead>
+            <tbody class="text-center">
+                {% for a in appointments if a.status in ["Completed","Cancelled"] %}
+                <tr>
+                    <td>{{a.id}}</td>
+                    <td>{{a.patient.fullname}}</td>
+                    <td>{{a.date}}</td>
+                    <td>{{a.slot}}</td>
+                    <td>{{a.doc}}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6">No Current Appointments !</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
-    <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#chart_modal"  >CHART</button>
+    <!-- chart_modal -->
     <div class="modal fade" id="chart_modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog  modal-fullscreen">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Unblacklist Patient</h1>
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Your Appointment Distribution</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="chart-container">
                         <div class="chart-box">
-                            <h3>pts per Subject</h3>
+                            
                             <canvas id="slotChart"></canvas>
                         </div>
                     </div>
@@ -268,6 +311,7 @@
             </div>
         </div>
     </div>
+    <!-- end_chart_modal -->
 
 </body>
 <script>
@@ -280,5 +324,15 @@
         }]
     }
 });
+document.getElementById("search").addEventListener("keyup", function() {
+    let filter = this.value.toLowerCase();
+    ['s1','s2','s3'].forEach(sid => {
+       let rows = document.querySelectorAll(`#${sid} tbody tr`);
+        rows.forEach(row => {
+            let text = row.textContent.toLowerCase();
+            row.style.display = text.includes(filter) ? "" : "none";
+            }); 
+        });      
+    }); 
 </script>
 </html>

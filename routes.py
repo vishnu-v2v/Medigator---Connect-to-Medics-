@@ -101,17 +101,18 @@ def admin_dash():
         #flash
         return redirect(url_for('home'))
     
-    patients = User.query.filter_by(role='user').all()
+    patients = Patient.query.join(User).filter(User.role =='user').all()
     doctors = Doctor.query.all()
     appointments = Appointment.query.all()
     departments=Department.query.all()
+    treatments=Treatment.query.all()
     
     total_appointments = Appointment.query.count()
     active_patients = Patient.query.count()
     doctorss = Doctor.query.count()
     
 
-    return render_template("admin_dash.html",patients=patients,doctors=doctors,appointments=appointments,departments=departments,total_appointments=total_appointments,
+    return render_template("admin_dash.html",patients=patients,doctors=doctors,appointments=appointments,departments=departments,total_appointments=total_appointments,treatments=treatments,
         active_patients=active_patients,
         doctorss=doctorss)
 
@@ -234,13 +235,14 @@ def delete_patient():
     # Get all appointments for this patient
     appointments = Appointment.query.filter_by(patientid=pid).all()
     
+
     # Delete all treatments associated with these appointments
     for appointment in appointments:
         Treatment.query.filter_by(appointmentid=appointment.id).delete()
     
     # Delete all appointments for this patient
     Appointment.query.filter_by(patientid=pid).delete()
-    
+    Patient.query.filter_by(user_id=pid).delete()
     # Delete the patient
     patient = User.query.filter_by(id=pid).first()
     if patient:
@@ -315,10 +317,20 @@ def user_dash(username):
         u_name = request.form["username"]
         em = request.form["email"]
         passw = request.form["password"]
+        age = request.form["age"]
+        h = request.form["height"]
+        w = request.form["weight"]
+        fname=request.form["fullname"]
         exist_user = User.query.filter_by(username=session.get('username')).first()
+        exist_patient=Patient.query.filter_by(user_id=exist_user.id).first()
         exist_user.username=u_name
         exist_user.email = em
-        exist_user.password = generate_password_hash(passw)
+        if passw.strip():
+            exist_user.password = generate_password_hash(passw)
+        exist_patient.age=age
+        exist_patient.height = h
+        exist_patient.weight=w
+        exist_patient.fullname=fname
         db.session.commit()
         session['username']=exist_user.username
         return redirect(url_for('user_dash',username=exist_user.username))
@@ -338,6 +350,8 @@ def user_dash(username):
     patient=Patient.query.filter_by(user_id=session.get('ua_id')).first()
     appointments=Appointment.query.filter_by(patientid=patient.id).all()
     departments=Department.query.all()
+    treatments = Treatment.query.join(Appointment).filter(Appointment.patientid == patient.id).all()
+    
 
     chart_treat = Treatment.query.join(Appointment).filter(
         Appointment.patientid == patient.id
@@ -349,7 +363,7 @@ def user_dash(username):
     print(dates)
     print(labels)
     print(counts)
-    return render_template("user_dash.html",username=username,me=patient,appointments=appointments,departments=departments,labels=labels,counts=counts)
+    return render_template("user_dash.html",username=username,me=patient,appointments=appointments,departments=departments,treatments=treatments,labels=labels,counts=counts)
 
 @app.route('/user_dash/<username>/Doctors')
 def user_doc(username):
@@ -431,13 +445,25 @@ def mark():
         d=request.form['date']
         did=request.form['did']
         slot=request.form['slot_type']
+        can=request.form['cancel']
         appoint=Appointment.query.filter_by(id=appid).first()
         davai=DoctorAvailablitiy.query.filter_by(doc_id=did,date=d).first()
-        appoint.status='Completed'
-        if slot == 'FN':
-            davai.cur_fn+=1
-        elif slot =='AN':
-            davai.cur_an+=1
+        if slot in ['FN','AN']:
+            appoint.status='Completed'
+            # appoint.doc=date.today()
+            if slot == 'FN':
+                davai.cur_fn+=1
+            elif slot =='AN':
+                davai.cur_an+=1
+            appoint.doc=date.today()
+        else:
+            appoint.status='Cancelled'
+            # appoint.doc=date.today()
+            if can == 'FN':
+                davai.cur_fn+=1
+            elif can =='AN':
+                davai.cur_an+=1
+            appoint.doc=date.today()
         db.session.commit()
         n=session.get('name')
     return redirect(url_for('doc_dash',myname=n))    

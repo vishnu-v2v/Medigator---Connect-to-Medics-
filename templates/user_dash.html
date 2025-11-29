@@ -43,8 +43,7 @@
             </div>
             
             <form class="d-flex" role="search">
-            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" style="width: 300px;"/>
-            <button class="btn btn-outline-light" type="submit">Search</button>
+            <input class="form-control me-2" id="search" type="search" placeholder="Search" aria-label="Search" style="width: 300px;"/>
             </form>
             <div>
                 |
@@ -54,7 +53,7 @@
                 |
                 <span style="color: aliceblue; font-size: large; font-weight: bold;">|</span>
                 |
-                <a style="text-decoration: none; color: aliceblue;" href="#"><span style="font-size: large;">History</span></a>
+                <a style="text-decoration: none; color: aliceblue;" href="#" data-bs-toggle="modal" data-bs-target="#hist_Backdrop"><span style="font-size: large;">History</span></a>
                 |
                 <span style="color: aliceblue; font-size: large; font-weight: bold;">|</span>
                 |
@@ -62,18 +61,22 @@
                 |
                 <span style="color: aliceblue; font-size: large; font-weight: bold;">|</span>
                 |
+                <a style="text-decoration: none; color: aliceblue;" href="#" data-bs-toggle="modal" data-bs-target="#chart2_modal"><span style="font-size: large;">Summary</span></a>
+                |
+                <span style="color: aliceblue; font-size: large; font-weight: bold;">|</span>
+                |
                 <a style="text-decoration: none; color: aliceblue;" href="{{url_for('logout')}}"><span style="font-size: large;">Logout</span></a>
                 |
                 <span style="color: aliceblue; font-size: large; font-weight: bold;">|</span>
+                |
             </div>
-            
         </div>
     </nav>
     
     <div class="container mt-5">
         <h3>Upcoming Appointments :</h3>
         <br>
-        <table class="table table-bordered">
+        <table class="table table-bordered" id="s1">
             <thead class="text-center">
                 <tr>
                     <th style="width: 100px;">ID</th>
@@ -85,8 +88,9 @@
                 </tr>
             </thead>
             <tbody class="text-center">
-                {% for a in appointments %}
+                {% for a in appointments if a.status not in ["Completed","Cancelled"] %}
                 <tr>
+
                     <td>{{a.id}}</td>
                     <td>{{a.doctor.name}}</td>
                     <td>{{a.doctor.department.name}}</td>
@@ -103,7 +107,7 @@
         </table>
         <br>
         <h3>Departments :</h3>
-        <table class="table table-bordered">
+        <table class="table table-bordered" id="s2">
             <thead class="text-center">
                 <tr>
                     <th>ID</th>
@@ -120,6 +124,7 @@
                     <td>{{dept.docsregistered}}</td>
                     <td><a href="{{url_for('dept',username=username,dept=dept.name)}}" class="btn btn-outline-dark" role="button">VIEW</a></td>
                 </tr>
+               
                 {% else %}
                 <tr>
                     <td colspan="4"> No Departments Registered Yet !</td>
@@ -129,11 +134,9 @@
         </table>
     </div>
 
-    
-    <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#chart2_modal"  >CHART 2</button>
      <!-- 1.Edit_Doc -->
         <div class="modal fade" id="edit_profile_Backdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-dialog-scrollable">
                 <div class="modal-content">
                 <div class="modal-header">
                     <h1 class="modal-title fs-5" id="staticBackdropLabel">Enter Updated Details :</h1>
@@ -147,14 +150,30 @@
                                     <input type="text" class="form-control" placeholder="" name='username'id="edit-un" value="{{username}}" required>
                                 </div>
                                 <div class="mb-3">
+                                    <label for="fullname" class="form-label">Fullname</label>
+                                    <input type="text" class="form-control" placeholder="" name='fullname'id="edit-fname" value="{{me.fullname}}" required>
+                                </div>
+                                <div class="mb-3">
                                     <label for="email" class="form-label">Email</label>
-                                    <input type="email" class="form-control" placeholder="" name='email'id="edit-email" value="{{me.email}}" required>
+                                    <input type="email" class="form-control" placeholder="" name='email'id="edit-email" value="{{session.get('email')}}" required>
                                 </div>
                                 <div class="mb-3">
                                     <label for="password" class="form-label">Password</label>
-                                    <input type="password" class="form-control" placeholder="Enter new password" name='password'id="edit-password" value="" required>
+                                    <input type="password" class="form-control" placeholder="Enter new password" name='password'id="edit-password">
                                 </div>
-                                
+                                <div class="col">
+                                    <label for="age" class="form-label">Age</label>
+                                    <input type="number" class="form-control" placeholder="Enter your age" name='age'id="age" value="{{me.age}}" required>
+                                </div>
+                                <div class="col">
+                                    <label for="height" class="form-label">Height</label>
+                                    <input type="number" class="form-control" placeholder="in cms" name='height'id="height" value="{{me.height}}" required>
+                                </div>
+                                <div class="col">
+                                    <label for="weight" class="form-label">Weight</label>
+                                    <input type="number" class="form-control" placeholder="in kgs" name='weight'id="weight" value="{{me.weight}}" required>
+                                </div>
+                                <br>
                                 <div class="d-flex justify-content-end gap-2">
                                     <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Close</button>
                                     <button  type="submit" class="btn btn-outline-success d-flex">Edit</button>
@@ -165,17 +184,84 @@
                 </div>
             </div>
     <!-- End_edit -->
+    <!-- 2.History -->
+     <div class="modal fade" id="hist_Backdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-fullscreen">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-3" id="staticBackdropLabel">History :</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                        <div class="modal-body">
+                            <h3 class="fs-5">Completed Appointments :</h3>
+                            <table class="table table-bordered">
+                                <thead class="text-center">
+                                    <tr>
+                                        <th style="width: 100px;">ID</th>
+                                        <th style="width: 200px;">DOCTOR</th>
+                                        <th style="width: 200px;">DEPT</th>
+                                        <th style="width: 180px;">DATE</th>
+                                        <th style="width: 150px;">SLOT</th>
+                                        <th style="width: 200px;">STATUS</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-center">
+                                    {% for a in appointments if a.status in ["Completed","Cancelled"] %}
+                                    <tr>
+                                        <td>{{a.id}}</td>
+                                        <td>{{a.doctor.name}}</td>
+                                        <td>{{a.doctor.department.name}}</td>
+                                        <td>{{a.date}}</td>
+                                        <td>{{a.slot}}</td>
+                                        <td>{{a.status}}</td>
+                                    </tr>
+                                    {% else %}
+                                    <tr>
+                                        <td colspan="6">No Current Appointments !</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            <br>
+                            <h3 class="fs-5">Treatment History:</h3>
+                            <table class="table table-bordered table-fixed">
+                                <thead>
+                                    <th style="width: 150px;">APPOINTMENT ID</th>
+                                    <th style="width: 200px;">DIAGNOSIS</th>
+                                    <th style="width: 350px;">PRESCRIPTION</th>
+                                    <th style="width: 350px;">EXTRAS</th>
+                                </thead>
+                                <tbody>
+                                    {% for t in treatments  %}
+                                        <tr>
+                                            <td>{{t.appointmentid}}</td>
+                                            <td>{{t.diagnosis}}</td>
+                                            <td>{{t.prescription}}</td>
+                                            <td>{{t.notes}}</td>
+                                        </tr>
+                                    {% else %}
+                                        <td colspan="6">No Treatments Yet!</td>
+                                    {% endfor %}
+
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+     <!-- ENDHISTORY -->
+      <!-- Chart_modal -->
      <div class="modal fade" id="chart2_modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog  modal-fullscreen">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Unblacklist Patient</h1>
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Your Treatment Distribution</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="chart-container">
                         <div class="chart-box">
-                            <h3>User Attempts per Subject</h3>
                             <canvas id="treatChart"></canvas>
                         </div>
                     </div>
@@ -183,7 +269,7 @@
             </div>
         </div>
     </div>
-
+    <!-- end_chart_modal -->
 </body>
 <script>
     new Chart(document.getElementById('treatChart'), {
@@ -197,5 +283,15 @@
         }]
     }
 });
+document.getElementById("search").addEventListener("keyup", function() {
+    let filter = this.value.toLowerCase();
+    ['s1','s2'].forEach(sid => {
+       let rows = document.querySelectorAll(`#${sid} tbody tr`);
+        rows.forEach(row => {
+            let text = row.textContent.toLowerCase();
+            row.style.display = text.includes(filter) ? "" : "none";
+            }); 
+        });      
+    }); 
 </script>
 </html>

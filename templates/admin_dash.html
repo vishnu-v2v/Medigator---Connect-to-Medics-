@@ -49,6 +49,10 @@
                 |
                 <span style="color: aliceblue; font-size: large; font-weight: bold;">|</span>
                 |
+                <a style="text-decoration: none; color: aliceblue;" href="" data-bs-toggle="modal" data-bs-target="#chart_modal"><span style="font-size: large;">Summary</span></a>
+                |
+                <span style="color: aliceblue; font-size: large; font-weight: bold;">|</span>
+                |
                 <a style="text-decoration: none; color: aliceblue;" href="{{url_for('logout')}}"><span style="font-size: large;">Logout</span></a>
                 |
                 <span style="color: aliceblue; font-size: large; font-weight: bold;">|</span>
@@ -134,14 +138,98 @@
                     <tr>
                     <th style="width: 100px;">ID</th>
                     <th style="width: 600px;">PATIENT</th>
+                    <th style="width: 200px;">HISTORY</th>
                     <th colspan="3">ACTIONS</th>
                     </tr>
                 </thead>
                 <tbody class="text-center">
-                   {% for p in patients%}
+                   {% for p in patients %}
                    <tr>
                     <td>{{ loop.index }}</td>
-                    <td>{{ p.username}}</td>
+                    <td>{{ p.fullname}}</td>
+                    <td>
+                        <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#view_modalll_{{p.id}}">VIEW</button>
+                        <div class="modal fade" id="view_modalll_{{p.id}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-fullscreen">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-3" id="staticBackdropLabel" style="font-size: xxx-large;">Patient History</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <container class="mt-4">
+                                            <h3 class=" fs-5">Completed Appointments:</h3>
+                                            <br>
+                                            <table class="table table-bordered">
+                                                <thead class="text-center">
+                                                    <tr>
+                                                        <th style="width: 100px;">ID</th>
+                                                        <th style="width: 200px;">DOCTOR</th>
+                                                        <th style="width: 200px;">DEPT</th>
+                                                        <th style="width: 180px;">DATE</th>
+                                                        <th style="width: 150px;">SLOT</th>
+                                                        <th style="width: 200px;">STATUS</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="text-center">
+                                                    {% for a in p.appointments if a.status in ["Completed","Cancelled"] %}
+                                                    <tr>
+                                                        <td>{{a.id}}</td>
+                                                        <td>{{a.doctor.name}}</td>
+                                                        <td>{{a.doctor.department.name}}</td>
+                                                        <td>{{a.date}}</td>
+                                                        <td>{{a.slot}}</td>
+                                                        <td>{{a.status}}</td>
+                                                    </tr>
+                                                    {% else %}
+                                                    <tr>
+                                                        <td colspan="6">No History of Appointments!</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                            <br>
+                                            <h3 class="fs-5">Treatment History:</h3>
+                                            <br>
+                                            <table class="table table-bordered table-fixed">
+                                                <thead>
+                                                    <th style="width: 150px;">APPOINTMENT ID</th>
+                                                    <th style="width: 200px;">DIAGNOSIS</th>
+                                                    <th style="width: 350px;">PRESCRIPTION</th>
+                                                    <th style="width: 350px;">EXTRAS</th>
+                                                </thead>
+                                                <tbody>
+                                                    
+
+                                                    {% for a in p.appointments %}
+                                                        {% set any_treatments = 0 %}
+                                                        {% for t in a.treatment %}
+                                                        {%  set any_treatments = any_treatments + 1 %}
+                                                        <tr>
+                                                            <td>{{ t.appointmentid }}</td>
+                                                            <td>{{ t.diagnosis }}</td>
+                                                            <td>{{ t.prescription }}</td>
+                                                            <td>{{ t.notes }}</td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                        
+                                                    {% endfor %}
+                                                    {% if any_treatments==0 %}
+                                                        <tr>
+                                                            <td colspan="4">No Treatments Yet!</td>
+                                                        </tr>
+                                                     {% endif %}
+
+                                                    
+                                                </tbody>
+                                            </table>
+                                            <br>
+                                        </container>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>   
+                    </td>
                     <td colspan="3" style="width: 50px;"> 
                         <div class="d-flex justify-content-around">
                             {% if p.blacklisted %}
@@ -174,13 +262,85 @@
                     </tr>
                 </thead>
                 <tbody class="text-center">
-                   {% for a in appointments %}
+                   {% for a in appointments if a.status not in ["Completed","Cancelled"]%}
                    <tr>
                     <td>{{ a.id }}</td>
-                    <td>{{ a.patient.username }}</td>
+                    <td>{{ a.patient.fullname }}</td>
                     <td>{{ a.doctor.name}}</td>
                     <td>{{a.doctor.department.name}}</td>
-                    <td><button class="btn btn-outline-warning">VIEW</button></td>
+                    <td>
+                        <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#view_modalll_{{a.patientid }}">VIEW</button>
+                        <div class="modal fade" id="view_modalll_{{a.patientid}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-fullscreen">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-3" id="staticBackdropLabel" style="font-size: xxx-large;">Patient History</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <container class="mt-4">
+                                            <h3 class=" fs-5">Completed Appointments:</h3>
+                                            <br>
+                                            <table class="table table-bordered">
+                                                <thead class="text-center">
+                                                    <tr>
+                                                        <th style="width: 100px;">ID</th>
+                                                        <th style="width: 200px;">DOCTOR</th>
+                                                        <th style="width: 200px;">DEPT</th>
+                                                        <th style="width: 180px;">DATE</th>
+                                                        <th style="width: 150px;">SLOT</th>
+                                                        <th style="width: 200px;">STATUS</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="text-center">
+                                                    {% for ap in appointments if ap.status in ["Completed","Cancelled"] and ap.patientid==a.patientid %}
+                                                    <tr>
+                                                        <td>{{ap.id}}</td>
+                                                        <td>{{ap.doctor.name}}</td>
+                                                        <td>{{ap.doctor.department.name}}</td>
+                                                        <td>{{ap.date}}</td>
+                                                        <td>{{ap.slot}}</td>
+                                                        <td>{{ap.status}}</td>
+                                                    </tr>
+                                                    {% else %}
+                                                    <tr>
+                                                        <td colspan="6">No History of Appointments!</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                            <br>
+                                            <h3 class="fs-5">Treatment History:</h3>
+                                            <br>
+                                            <table class="table table-bordered table-fixed">
+                                                <thead>
+                                                    <th style="width: 150px;">APPOINTMENT ID</th>
+                                                    <th style="width: 200px;">DIAGNOSIS</th>
+                                                    <th style="width: 350px;">PRESCRIPTION</th>
+                                                    <th style="width: 350px;">EXTRAS</th>
+                                                </thead>
+                                                <tbody>
+                                                    {% for t in treatments if t.appointment.patientid==a.patientid %}
+                                                        <tr>
+                                                            <td>{{t.appointmentid}}</td>
+                                                            <td>{{t.diagnosis}}</td>
+                                                            <td>{{t.prescription}}</td>
+                                                            <td>{{t.notes}}</td>
+                                                        </tr>
+                                                    {% else %}
+                                                        <td colspan="6">No Treatments Yet!</td>
+                                                    {% endfor %}
+
+                                                </tbody>
+                                            </table>
+                                            <br>
+                                            
+                                        </container>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
                    </tr>
                    {% else %}
                    <tr>
@@ -191,7 +351,6 @@
             </table>
             
         </div>
-        <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#chart1_modal"  >CHART 1</button>
         
         <!-- Modals -->
             <!-- create_dept -->
@@ -329,7 +488,7 @@
                                 <div class="d-flex justify-content-end gap-2">
                                     <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
                                     <button  type="submit" class="btn btn-outline-danger d-flex">Delete</button>
-                                </div> 
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -455,17 +614,17 @@
                     </div>
                 </div>
                 <!-- End-unlack_Modal -->
-                 <div class="modal fade" id="chart1_modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                 <!-- Chart_modal -->
+                <div class="modal fade" id="chart_modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                     <div class="modal-dialog  modal-fullscreen">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="staticBackdropLabel">Unblacklist Patient</h1>
+                                <h1 class="modal-title fs-5" id="staticBackdropLabel">Overview</h1>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
                                 <div class="chart-container">
                                     <div class="chart-box">
-                                        <h3>User Attempts per Subject</h3>
                                         <canvas id="adminChart"></canvas>
                                     </div>
                                 </div>
@@ -473,6 +632,7 @@
                         </div>
                     </div>
                 </div>
+                <!-- end_chart_modal -->
          <!-- End_Modals -->
     </main>
 
@@ -548,9 +708,9 @@
         rows.forEach(row => {
             let text = row.textContent.toLowerCase();
             row.style.display = text.includes(filter) ? "" : "none";
-        }); 
-    });      
-});
+            }); 
+        });      
+    });
 
 
 // Chart
