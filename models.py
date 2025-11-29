@@ -21,7 +21,7 @@ class Patient(db.Model):
     weight = db.Column(db.Integer,nullable=False)
     height = db.Column(db.Integer, nullable=False)
 
-    user = db.relationship('User',foreign_keys=[user_id],backref='patients')
+    user = db.relationship('User',foreign_keys=[user_id],backref='patient')
 
 class Doctor(db.Model):
     __tablename__="Doctors"
@@ -64,6 +64,7 @@ class Appointment(db.Model):
     doctorid=db.Column(db.Integer,db.ForeignKey('Doctors.id'),nullable=False)
     date = db.Column(db.Date,nullable=False)
     slot = db.Column(db.String,nullable=False)  
+    doc = db.Column(db.Date)
     status = db.Column(db.String(20),default="In Progress")
 
     patient = db.relationship('Patient',foreign_keys=[patientid],backref='appointments')
@@ -79,7 +80,7 @@ class Treatment(db.Model):
     notes = db.Column(db.String(100))
 
     appointment = db.relationship('Appointment',backref='treatment')
-
+    
 class Department(db.Model):
     __tablename__="Departments"
     id = db.Column(db.Integer,primary_key=True)
