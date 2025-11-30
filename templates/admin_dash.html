@@ -233,11 +233,11 @@
                     <td colspan="3" style="width: 50px;"> 
                         <div class="d-flex justify-content-around">
                             {% if p.blacklisted %}
-                            <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#unblacklist_patient_modal" data-pid="{{p.id}}" >UNBLACKLIST</button>
+                            <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#unblacklist_patient_modal" data-pid="{{p.user_id}}" >UNBLACKLIST</button>
                             {% else %}
-                            <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#blacklist_patient_modal" data-pid="{{p.id}}" >BLACKLIST</button>
+                            <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#blacklist_patient_modal" data-pid="{{p.user_id}}" >BLACKLIST</button>
                             {% endif %}
-                            <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#delete_patient_modal" data-pid="{{p.id}}" >DELETE</button>
+                            <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#delete_patient_modal" data-pid="{{p.user_id}}" >DELETE</button>
                         </div>
                     </td>
                    </tr>
