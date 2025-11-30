@@ -7,7 +7,7 @@ from models import *
 
 app= Flask(__name__)
 app.config["SECRET_KEY"] = "MyKey"
-app.config["SQLALCHEMY_DATABASE_URI"]= "sqlite:///HMS.db"
+app.config["SQLALCHEMY_DATABASE_URI"]= "sqlite:///HMSDB.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
@@ -20,7 +20,7 @@ with app.app_context():
             id = 1,
             username="Admin",
             email='admin@dummy.com',
-            password = generate_password_hash("Admin123"),
+            password = generate_password_hash("admin123"),
             role="admin"
             )
         db.session.add(admin)
