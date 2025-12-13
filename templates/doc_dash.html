@@ -128,8 +128,8 @@
                     <td>{{a.date}}</td>
                     <td>{{a.slot}}</td>
                     <td>
-                        {{a.status}} <span style="font-weight: bold;font-size: large;">-></span> </span><button class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#view_modal_{{a.id}}">VIEW</button>
-                        <div class="modal fade" id="view_modal_{{a.id}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                        {{a.status}} <span style="font-weight: bold;font-size: large;">-></span> </span><button class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#view_modal___{{a.id}}">VIEW</button>
+                        <div class="modal fade" id="view_modal___{{a.id}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                             <div class="modal-dialog modal-fullscreen">
                                 <div class="modal-content">
                                     <div class="modal-header">
@@ -152,6 +152,10 @@
                                                             <td>{{t.diagnosis}}</td>
                                                             <td>{{t.prescription}}</td>
                                                             <td>{{t.notes}}</td>
+                                                        </tr>
+                                                    {% else %}
+                                                        <tr>
+                                                            <td colspan="4">No Treatments Yet!</td>
                                                         </tr>
                                                     {% endfor %}
                                                 </tbody>
@@ -286,7 +290,7 @@
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="6">No Current Appointments !</td>
+                    <td colspan="5">No Current Appointments !</td>
                 </tr>
                 {% endfor %}
             </tbody>

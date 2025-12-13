@@ -93,14 +93,15 @@ def doc_login():
 
 @app.route('/admin_dash',methods=["GET","POST"])
 def admin_dash():
-    if not session.get('role') == "admin":
-        #flash
-        return redirect(url_for('user_dash',username=session.get('username')))
-    
     if 'ua_id' not in session :
         #flash
         return redirect(url_for('home'))
     
+    if session.get('role') != "admin":
+        #flash
+        return redirect(url_for('user_dash',username=session.get('username')))
+    
+    update_doc_avail()
     patients = Patient.query.join(User).filter(User.role =='user').all()
     doctors = Doctor.query.all()
     appointments = Appointment.query.all()
@@ -346,7 +347,7 @@ def user_dash(username):
         #flash
         return redirect(url_for('user_login'))
     
-    
+    update_doc_avail()
     patient=Patient.query.filter_by(user_id=session.get('ua_id')).first()
     appointments=Appointment.query.filter_by(patientid=patient.id).all()
     departments=Department.query.all()
@@ -403,6 +404,8 @@ def book():
 
 @app.route('/doc_dash/<myname>',methods=["GET","POST"])
 def doc_dash(myname):
+    update_doc_avail()
+
     if session.get('role') != "doc":
         #flash
         return redirect(url_for('user_dash',username=session.get('username')))
@@ -473,3 +476,28 @@ def logout():
     session.clear()
     flash("You have logged out successfully...!","info")
     return redirect(url_for('home'))
+
+def update_doc_avail():
+    today = date.today()
+    doctors = Doctor.query.all()
+    
+    for d in doctors:
+        availabilities = DoctorAvailablitiy.query.filter_by(doc_id=d.id).all()
+
+        for a in availabilities:
+            if a.date < today:
+                db.session.delete(a)
+        
+        existing_dates = {a.date for a in DoctorAvailablitiy.query.filter_by(doc_id=d.id).filter(DoctorAvailablitiy.date >= today).all()}
+        
+        for i in range(1, 8):
+            future_date = today + timedelta(days=i)
+            if future_date not in existing_dates:
+                new_availability = DoctorAvailablitiy(
+                    doc_id=d.id,
+                    date=future_date,
+                    cur_fn=d.fn_slots,
+                    cur_an=d.an_slots
+                )
+                db.session.add(new_availability)
+    db.session.commit()
