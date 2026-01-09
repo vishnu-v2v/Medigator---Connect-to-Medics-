@@ -1,0 +1,62 @@
+{% extends "base_pub.html" %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 text-center">
+      <br>
+      <br>
+      <h1 class="fw-bold mb-4">Contact Us</h1>
+      <p class="lead text-muted">
+        Have questions, feedback, or need support? We’d love to hear from you.
+      </p>
+    </div>
+  </div>
+
+  <div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+      <div class="card shadow border-0">
+        <div class="card-body p-4">
+          <form method="post" action="#">
+            <div class="mb-3">
+              <label class="form-label">Full Name</label>
+              <input type="text" class="form-control" placeholder="Enter your name" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Email Address</label>
+              <input type="email" class="form-control" placeholder="Enter your email" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Message</label>
+              <textarea class="form-control" rows="4" placeholder="Your message..." required></textarea>
+            </div>
+
+            <div class="text-center">
+              <button type="submit" class="btn btn-warning px-4">
+                Send Message
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row text-center mt-5">
+    <div class="col-md-4">
+      <h6 class="fw-bold">Email</h6>
+      <p>dummy@support.com</p>
+    </div>
+    <div class="col-md-4">
+      <h6 class="fw-bold">Phone</h6>
+      <p>0987654321</p>
+    </div>
+    <div class="col-md-4">
+      <h6 class="fw-bold">Support Hours</h6>
+      <p>Mon – Sat, 9 AM – 6 PM</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
